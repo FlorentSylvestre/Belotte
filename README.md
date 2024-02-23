@@ -1,7 +1,7 @@
 This is a terminal Belotte card game implemented in python
 
 To play:
-pytho3 main.py
+python3 main.py
 
 
 To check the Rule:
