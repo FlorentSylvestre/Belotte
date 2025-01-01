@@ -195,15 +195,3 @@ class GUIBelotte:
     @staticmethod
     def clear_screen():
         os.system(SYSTEM_CLEAR[os.name])
-
-    @staticmethod
-    def print_menu():
-        print("BELOTTE GAME")
-        print(f"First team to {WIN_SCORE} wins")
-        print("option to print rules will be shortly implemented, i'm lazy A-F")
-        print("Bisous bisous")
-        print("Do you wanna play? Y/N ")
-        play = ""
-        while play not in ["Y", "N"]:
-            play = input().capitalize()
-        return play

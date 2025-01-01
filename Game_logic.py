@@ -5,32 +5,35 @@ from typing import Optional
 from Cards import Cards, BeloteDeck
 from GUI import GUIBelotte
 from player import Player, Winner
-from rules import is_playable_belotte, is_trump, BelotteScore
+from rules import is_playable_belotte, is_trump
+from scoring import BelotteScore
 from Protocols import GameState
 
 
-# TODO: Could probably improve the shift dealer function
 class BelotePlayerInfos:
 
     def __init__(self, players):
         self.players: Optional[list[Player]] = players
-        self.dealer: Player = self.players[3]
+        self.dealer: Player = players[3]  # TODO randomize first dealer later, is fixed for testing
         self.reorder(self.players.index(self.dealer) + 1)
 
     def reorder(self, p: int | Player) -> None:
-
         k = p if isinstance(p, int) else self.players.index(p)
         self.players = self.players[k:] + self.players[:k]
 
-    def get_partner(self, player) -> Player:
-        # TODO Moche
-        return [p for p in self.players if player.team == p.team
-                and player.name != p.name][0]
-
     def shift_dealer(self) -> None:
-        # What the fuck is going on here
-        self.dealer = self[0]
-        self.reorder(self.players.index(self.dealer) + 1)
+        """ Set the player left to the last dealer as the new dealer"""
+        index = self.players.index(self.dealer)
+        if index == 4:  # Handle when previous dealer is last on list
+            index = 0
+
+        self.reorder(index)
+        self.dealer = self.players[index]
+
+    def get_partner(self, player) -> Player:
+        for p in self.players:
+            if player.team == p.team and player.name != p.name:
+                return p
 
     def __getitem__(self, item) -> Player | list[Player]:
         return self.players[item]
@@ -53,7 +56,7 @@ class BelotteBoardInfos:
         self.played_fold.append(self.current_Fold)
         self.current_Fold = []
 
-    def update_winner(self, player: Player) -> None:
+    def update_winner(self, player: Player) -> None:  # TODO This should be in the rules
         last_play = self.current_Fold[-1]
         if len(self.current_Fold) == 1:
             self.winner = Winner(player, last_play)
@@ -72,8 +75,6 @@ class BelotteBoardInfos:
     def get_winner_team(self) -> Optional[int]:
         if self.winner is not None:
             return self.winner.team
-
-    # TODO: Move this. Board shouldnt handle rules
 
 
 class BelotteDealState:
@@ -183,6 +184,7 @@ class BelotteGame:
         shuffle(new_deck)
         self.deck = BeloteDeck([j for i in new_deck for j in i])
         self.deck.reinitialize_cards()
+
 
     def player_turn(self, player: 'Player') -> 'Cards':
         hand = [x for x in self.deck if x.get_player() == player]
