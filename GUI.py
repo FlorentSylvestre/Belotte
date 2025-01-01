@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, Callable
 
 from Cards import BeloteDeck, Cards
 from Constante import CARD_PLOT_STRING, OFFSET, PLAYER_ORIENTATION, CARD_PLOT_COORD, CARD_CHAR, SYSTEM_CLEAR, \
@@ -22,12 +22,51 @@ def init_grid_belotte() -> list[list[str]]:
     return layout
 
 
+type prompter = dict["str", tuple[str, Callable]]
+
+
+def check_options(options: list[str]) -> str:
+    s = ""
+    while s.capitalize() not in options:
+        s = input()
+    return s
+
+
+def pr_yes_or_no() -> bool:
+    yes = ["Y", "O", "YES", "OUI"]
+    no = ["N", "NO", "NON"]
+    return check_options(yes + no) in yes
+
+
+def pr_second_pick(options: list[str]) -> str:
+    for choice, pos in enumerate(options):
+        print(f"{choice}: {pos}")
+    return check_options(options)
+
+
+def pr_play_card(playable: list['Cards']) -> Cards:
+    pick = check_options([str(x) for x in range(len(playable))])
+    return playable[int(pick)]
+
+
+prompt_belote: prompter = {"menu": (f"""
+BELOTTE GAME
+First team to {WIN_SCORE} wins
+option to print rules will be shortly implemented, i'm lazy A-F
+Do you wanna play?
+Y / N
+""", pr_yes_or_no),
+                           "first_pick": ("Do you want to play this card?\n Y/N", pr_yes_or_no),
+                           "second_pick": ("Do you want to play another suit?", pr_second_pick),
+                           "play_card": ("Which card do you want to play? (input Number)", pr_play_card),
+                           "stop_game": ("do you to keep playing? Y/N", pr_yes_or_no)}
+
+
 # TODO: separate score and GUI
 # TODO: add trump and taking team infos
 # TODO: ask about handling new game?
 # TODO: add function about quiting anytime
 # TODO: add stopping time at the right place (GUI.pause method ?)
-# TODO: separate GUI in menu / game / prompt?
 
 class GUIBelotte:
 
@@ -121,14 +160,6 @@ class GUIBelotte:
             card_string = self.get_card_str(card, orientation)
             card_coord = self.compute_card_pos(card)
 
-            # print("Updating:")
-            # print(player)
-            # print(card)
-            # print(orientation)
-            # print(self.select_offset(card))
-            # print(card_coord)
-            # print("")
-
             # Add card layout to the grid
             self.add_card_to_grid(card_string, card_coord)
 
@@ -157,33 +188,13 @@ class GUIBelotte:
         print("\n".join(["".join(x) for x in self.grid]))
 
     @staticmethod
-    def prompt_first_pick() -> str:
-        print("Do you want to play this card? Y/N\n")
-        return input()
-
-    @staticmethod
-    def prompt_second_pick(choice: list[str]) -> str:
-        print("Do you want to play another suit? \n")
-        for suit, pos in enumerate(choice):
-            print(f"{suit}: {pos}")
-        return input()
-
-    @staticmethod
-    def prompt_play_card() -> str:
-        print("Which card do you want to play? (input Number)")
-        return input()
+    def user_prompt(name: str, *args) -> str | Cards | bool:
+        print(prompt_belote[name][0])
+        return prompt_belote[name][1]() if not args else prompt_belote[name][1](*args)
 
     @staticmethod
     def clear_screen():
         os.system(SYSTEM_CLEAR[os.name])
-
-    @staticmethod
-    def quit_game() -> bool:
-        os.system("cls")
-        stop_game = ""
-        while stop_game.capitalize() not in ["Y", "N"]:
-            stop_game: str = input(f"do you to keep playing? Y/N ")
-        return False if stop_game.capitalize() == "N" else True
 
     @staticmethod
     def print_menu():

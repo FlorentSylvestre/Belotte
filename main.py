@@ -9,7 +9,7 @@ def main():
     end_game = False
     score_global: dict[int, int] = {0: 0, 1: 0}
     GUI = GUIBelotte()
-    if GUI.print_menu() == "N":
+    if not GUI.user_prompt("menu"):
         quit()
 
     playerstate = BelotePlayerInfos(define_players())
@@ -23,7 +23,7 @@ def main():
         # TODO score output is broken
         if result is not None:
             score_global = {x: (score_global[x] + result[x]) for x in result}
-        end_game = GUI.quit_game()
+        end_game = GUI.user_prompt("stop_game")
 
 
 # TODO: Improve game logic and team building

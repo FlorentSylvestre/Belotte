@@ -12,28 +12,20 @@ if TYPE_CHECKING:
 class RealBelotteStrategy:
     @staticmethod
     def first_choice(game: 'BelotteGame') -> bool:
-        pick = ""
-        while pick.upper() not in ["Y", "YES", "OUI", "N", "NO", "NON"]:
-            pick = game.GUI.prompt_first_pick()
-        return pick.upper() in ["Y", "YES", "OUI"]
+        return game.GUI.user_prompt("first_pick")
 
     @staticmethod
     def second_choice(game: 'BelotteGame') -> str:
-        pick = None
         flipped = [x for x in game.deck if x.get_loc() == "flipped"][0]
         choice = [x for x in BELOTE_SUITS if x != flipped.suit]
         choice.append("NO")
-        while pick not in [str(x) for x in range(len(choice))]:
-            pick = game.GUI.prompt_second_pick(choice)
-        return choice[int(pick)]
+
+        return game.GUI.user_prompt("second_pick", choice)
 
     @staticmethod
     def pick_play(hand: list['Cards'], game: 'BelotteGame') -> 'Cards':
-        pick = None
         playable = [x for x in hand if x.legit]
-        while pick not in [str(x) for x in range(len(playable))]:
-            pick = game.GUI.prompt_play_card()
-        return playable[int(pick)]
+        return game.GUI.user_prompt("play_card", playable)
 
 
 class RandomBelotteStrategy:

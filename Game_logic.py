@@ -73,8 +73,7 @@ class BelotteBoardInfos:
         if self.winner is not None:
             return self.winner.team
 
-
-# TODO: Move this. Board shouldnt handle rules
+    # TODO: Move this. Board shouldnt handle rules
 
 
 class BelotteDealState:
@@ -165,7 +164,6 @@ class BelotteGame:
         self.count_turn: int = 1
         self.game_played: bool = False
 
-    # TODO: A lot of this is duplicated from board class. Useless?
     def get_winner(self) -> Winner:
         return self.board.winner
 
