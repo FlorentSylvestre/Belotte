@@ -20,12 +20,10 @@ def main():
         board = BelotteBoardInfos()
         new_round = BelotteGame(board, playerstate, deck, GUI)
         result, deck = new_round.run_round()
-        # TODO score output is broken
         if result is not None:
             score_global = {x: (score_global[x] + result[x]) for x in result}
         end_game = GUI.user_prompt("stop_game")
 
 
-# TODO: Improve game logic and team building
 if __name__ == "__main__":
     main()

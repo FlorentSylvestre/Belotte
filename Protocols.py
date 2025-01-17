@@ -1,4 +1,4 @@
-from typing import Protocol, Optional, Callable, TYPE_CHECKING
+from typing import Protocol, Optional, Callable, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from player import Player
@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 class CardState(Protocol):
     loc: str
     player: Optional["Player"]
+    pos: Optional[Tuple[int, int]]
+    image: Optional[str]
 
     @staticmethod
     def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:

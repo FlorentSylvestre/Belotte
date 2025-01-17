@@ -1,5 +1,3 @@
-import os
-import time
 from random import shuffle
 from typing import Optional
 from Cards import Cards, BeloteDeck
@@ -139,7 +137,6 @@ class BelottePlayState:
                     game.board.asked_suit = play.suit
                 game.board.update_winner(player)
             game.print_game()
-            os.system("pause")
 
             if game.board.get_winner_team() == game.has_taken.team:
                 if game.count_turn == BelottePlayState.TOTAL_RUN:
@@ -149,7 +146,6 @@ class BelottePlayState:
             game.board.archive_fold()
             game.players.reorder(game.get_winner().player)
             game.count_turn += 1
-            time.sleep(5)
         game.deck.reinitialize_cards()
 
 
@@ -184,7 +180,6 @@ class BelotteGame:
         shuffle(new_deck)
         self.deck = BeloteDeck([j for i in new_deck for j in i])
         self.deck.reinitialize_cards()
-
 
     def player_turn(self, player: 'Player') -> 'Cards':
         hand = [x for x in self.deck if x.get_player() == player]

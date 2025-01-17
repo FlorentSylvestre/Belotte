@@ -1,8 +1,8 @@
 from random import shuffle
 from typing import TYPE_CHECKING, Optional
-from Protocols import CardState
 from Constante import BELOTE_VALUES, BELOTE_SUITS, BELOTE_TRUMP_SCORE, \
-    BELOTE_SCORE
+    BELOTE_SCORE, CARD_PLOT_COORD, CARD_PLOT_STRING, OFFSET
+from Protocols import CardState
 
 if TYPE_CHECKING:
     from player import Player
@@ -12,42 +12,65 @@ class StateDeck:
     def __init__(self):
         self.loc = "deck"
         self.player = None
+        self.pos = None
+        self.image = None
 
     @staticmethod
     def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:
         if player is None:
             card.state = StateFlipped()
             return None
-        card.state = StateHand(player)
+
+        player.register_card(card)
+        card.state = StateHand(player, card)
 
 
 class StateFlipped:
     def __init__(self):
         self.loc = "flipped"
         self.player = None
+        self.pos = CARD_PLOT_COORD["flipped"]
+        self.image = CARD_PLOT_STRING["real_v"]
 
     @staticmethod
     def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:
         if player is not None:
-            card.state = StateHand(player)
+            player.register_card(card)
+            card.state = StateHand(player, card)
 
 
 class StateHand:
 
-    def __init__(self, player: 'Player'):
+    def __init__(self, player: 'Player', card: 'Cards'):
         self.player = player
         self.loc = "hand"
+        self.string_type = "real" if (player.pos == '1') else "dummy"
+
+        pos_fetch = "_".join([self.string_type, player.orientation, self.loc, player.pos])
+        self.pos = (CARD_PLOT_COORD[pos_fetch][0] + player.hand.index(card) * OFFSET[player.orientation][0],
+                    CARD_PLOT_COORD[pos_fetch][1] + player.hand.index(card) * OFFSET[player.orientation][1])
+
+        self.image = CARD_PLOT_STRING[self.string_type + "_" + player.orientation]
+
+    def shift_one(self):
+        self.pos = (self.pos[0] - OFFSET[self.player.orientation][0],
+                    self.pos[1] - OFFSET[self.player.orientation][1])
 
     @staticmethod
     def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:
-        if player is not None:
-            card.state = StatePlayed(player)
+        card_pos = player.hand.index(card)
+        player.remove_card(card)
+        for c in player.hand[card_pos:]:
+            c.state.shift_one()
+        card.state = StatePlayed(player)
 
 
 class StatePlayed:
     def __init__(self, player: 'Player'):
         self.player = player
         self.loc = "played"
+        self.pos = CARD_PLOT_COORD[f"real_{player.orientation}_played_{player.pos}"]
+        self.image = CARD_PLOT_STRING[f"real_{player.orientation}"]
 
     @staticmethod
     def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:
@@ -59,7 +82,7 @@ class Cards:
     by its suit, color, score
     and its state"""
 
-    def __init__(self, suit: str, value: str, state: CardState) -> None:
+    def __init__(self, suit: str, value: str, state: 'CardState') -> None:
         self.suit = suit.upper()
         self.value = value.upper()
         self.state = state
@@ -84,8 +107,11 @@ class Cards:
 
     def __eq__(self, other):
         if isinstance(other, Cards):
-            return self.suit == other.suit and self.value == self.value
+            return self.suit == other.suit and self.value == other.value
         return False
+
+    # def __str__(self):
+    #     return f"{self.suit, self.value}"
 
 
 def generate_32_card_deck():

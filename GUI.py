@@ -1,9 +1,9 @@
 import os
-from typing import Optional, Callable
+from typing import Callable
 
 from Cards import BeloteDeck, Cards
-from Constante import CARD_PLOT_STRING, OFFSET, PLAYER_ORIENTATION, CARD_PLOT_COORD, CARD_CHAR, SYSTEM_CLEAR, \
-    CARD_CHAR_PLAYABLE, WIN_SCORE, INIT_OFFSET
+from Constante import PLAYER_ORIENTATION, CARD_CHAR, SYSTEM_CLEAR, \
+    CARD_CHAR_PLAYABLE, WIN_SCORE
 
 
 def init_grid_belotte() -> list[list[str]]:
@@ -41,7 +41,8 @@ def pr_yes_or_no() -> bool:
 def pr_second_pick(options: list[str]) -> str:
     for choice, pos in enumerate(options):
         print(f"{choice}: {pos}")
-    return check_options(options)
+    selected = check_options([str(x) for x in range(len(options))])
+    return options[int(selected)]
 
 
 def pr_play_card(playable: list['Cards']) -> Cards:
@@ -68,46 +69,21 @@ Y / N
 # TODO: add function about quiting anytime
 # TODO: add stopping time at the right place (GUI.pause method ?)
 
+
 class GUIBelotte:
 
     def __init__(self):
-        self.offset = INIT_OFFSET.copy()
-        self.shift_offset(1, "v")
         self.grid = init_grid_belotte()
-        self.count_player1 = -1
+        self.count_option = 0
 
     @staticmethod
     def get_card_coord(card: 'Cards') -> tuple[int, int]:
-        """ Fetch grid postion for a card
-        or the starting point of the player's hand in not in play"""
-
-        where = card.get_loc()
-        if where not in ["deck", "flipped"]:
-            who = card.get_pos()
-            orientation = PLAYER_ORIENTATION[who]
-            string_type = "real" if (who == '1' or where == "played") else "dummy"
-            return CARD_PLOT_COORD["_".join([string_type, orientation, where, str(who)])]
-
-        return CARD_PLOT_COORD[where]
-
-    def select_offset(self, card: Cards):
-        if card.get_loc() == "hand":
-            return self.offset[card.get_pos()]
-
-        return self.offset[card.get_loc()]
-
-    def compute_card_pos(self, card: 'Cards'):
-        offset = self.select_offset(card)
-        cardpos = self.get_card_coord(card)
-        return offset[0] + cardpos[0], offset[1] + cardpos[1]
+        """ Fetch grid postion for a card"""
+        return card.state.pos
 
     @staticmethod
-    def get_card_str(card: 'Cards', orientation: str) -> str:
-        """" Determines which reference string is need to represent a card
-        based on its position on the board"""
-
-        string_type = "real" if (card.get_pos() == "1" or card.get_loc() in ["played", "flipped"]) else "dummy"
-        return CARD_PLOT_STRING[string_type + "_" + orientation]
+    def get_card_str(card: 'Cards') -> str:
+        return card.state.image
 
     def add_card_to_grid(self, cardstring: str, cardpos: tuple[int, int]) -> None:
         cardstr = cardstring.split(".")
@@ -136,29 +112,20 @@ class GUIBelotte:
 
     def print_player_option(self, cardpos: tuple[int, int]) -> None:
         """Print the playable options for human player"""
-        self.grid[cardpos[0] + 5][cardpos[1] + 3] = str(self.count_player1)
-
-    def shift_offset(self, pos: Optional[int], orientation: str) -> None:
-        if pos is None:
-            return None
-        self.offset[str(pos)] = [self.offset[str(pos)][0] + OFFSET[orientation][0],
-                                 self.offset[str(pos)][1] + OFFSET[orientation][1]]
+        self.grid[cardpos[0] + 5][cardpos[1] + 3] = str(self.count_option)
 
     def update_grid(self, deck: BeloteDeck):
-
-        # Reinitialize the grid caracteristic
         self.reinitialize_grid()
-
         # Update each card position on the grid
         for card in deck:
             if card.get_loc() == "deck":
                 continue
-
+            card.state.update = 0
             # Gather card representation and grid position
             player = card.get_pos()
             orientation = PLAYER_ORIENTATION[player]
-            card_string = self.get_card_str(card, orientation)
-            card_coord = self.compute_card_pos(card)
+            card_string = self.get_card_str(card)
+            card_coord = self.get_card_coord(card)
 
             # Add card layout to the grid
             self.add_card_to_grid(card_string, card_coord)
@@ -168,21 +135,13 @@ class GUIBelotte:
                 self.show_value(card, card_coord, orientation)
 
             # Print First player legal moves and card values
-            if card.get_pos() == "1" and card.legit:
-                self.count_player1 += 1
+            if card.get_pos() == "1" and card.get_loc() == "hand" and card.legit:
                 self.print_player_option(card_coord)
-
-            # Updates offset for correct card alignement in hand
-
-            if card.get_loc() == "hand":
-                self.shift_offset(player, orientation)
+                self.count_option += 1
 
     def reinitialize_grid(self):
         self.grid = init_grid_belotte()
-        self.offset = INIT_OFFSET.copy()
-        self.count_player1 = -1
-        print(self.offset)
-        print(INIT_OFFSET)
+        self.count_option = 0
 
     def print_grid(self):
         print("\n".join(["".join(x) for x in self.grid]))

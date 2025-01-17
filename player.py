@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from Constante import BELOTE_SUITS
 
 if TYPE_CHECKING:
@@ -59,6 +59,14 @@ class Player:
         self.pick_play = self.strategy.pick_play
         self.second_choice = self.strategy.second_choice
         self.first_choice = self.strategy.first_choice
+        self.orientation = self.team * "h" + (1-self.team) * "v"
+        self.hand: List['Cards'] = []
+
+    def register_card(self, c: 'Cards'):
+        self.hand.append(c)
+
+    def remove_card(self, c: 'Cards'):
+        self.hand.remove(c)
 
 
 @dataclass
