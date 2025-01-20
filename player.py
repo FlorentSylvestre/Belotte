@@ -38,7 +38,7 @@ class RandomBelotteStrategy:
     @staticmethod
     def second_choice(game: 'BelotteGame') -> str:
         flipped = [x for x in game.deck if x.get_loc() == "flipped"][0]
-        choice = [x for x in BELOTE_SUITS if x != flipped.get_suit()]
+        choice = [x for x in BELOTE_SUITS if x != flipped.suit()]
         choice.append("NO")
         random.shuffle(choice)
         return choice.pop()

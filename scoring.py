@@ -20,10 +20,9 @@ class BelotteScore:
         self.score: int = 0
 
     def update(self, turn: list["Cards"]) -> None:
-        score = 0
         for card in turn:
-            score += card.score
-        self.score += score
+            self.score += card.score
+        print(self.score)
 
     def der_de_der(self) -> None:
         self.score += 10
@@ -42,6 +41,8 @@ class BelotteScore:
                     (1 - game.has_taken.team): 0}
 
         if is_round_won(self.score):
+            print({game.has_taken.team: self.score,
+                    (1 - game.has_taken.team): TOTAL_SCORE_ROUND - self.score})
             return {game.has_taken.team: self.score,
                     (1 - game.has_taken.team): TOTAL_SCORE_ROUND - self.score}
 

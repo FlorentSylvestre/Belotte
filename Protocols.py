@@ -9,8 +9,10 @@ if TYPE_CHECKING:
 class CardState(Protocol):
     loc: str
     player: Optional["Player"]
-    pos: Optional[Tuple[int, int]]
-    image: Optional[str]
+    pos = Tuple[int, int]
+    visible = bool
+    size = str
+    orientation = "v"
 
     @staticmethod
     def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:

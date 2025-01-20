@@ -72,18 +72,27 @@ Y / N
 
 class GUIBelotte:
 
-    def __init__(self):
+    def __init__(self, coord_sys: dict[str: int], str_card: dict[str: str], offset: dict[str: tuple[int, int]]):
         self.grid = init_grid_belotte()
         self.count_option = 0
+        self.coord = coord_sys
+        self.card_str = str_card
+        self.offset = offset
 
-    @staticmethod
-    def get_card_coord(card: 'Cards') -> tuple[int, int]:
+    def get_card_coord(self, c: 'Cards') -> tuple[int, int]:
         """ Fetch grid postion for a card"""
-        return card.state.pos
 
-    @staticmethod
-    def get_card_str(card: 'Cards') -> str:
-        return card.state.image
+        if c.state.loc == "flipped":
+            return self.coord["flipped"]
+
+        fetch = "_".join([c.state.size, c.state.orientation,
+                          c.state.loc, c.get_pos()])
+
+        return (self.coord[fetch][0] + self.offset[c.state.orientation][0] * c.state.pos[0],
+                self.coord[fetch][1] + self.offset[c.state.orientation][1] * c.state.pos[0])
+
+    def get_card_str(self, c: 'Cards') -> str:
+        return self.card_str[c.state.size + "_" + c.state.orientation]
 
     def add_card_to_grid(self, cardstring: str, cardpos: tuple[int, int]) -> None:
         cardstr = cardstring.split(".")
@@ -120,7 +129,6 @@ class GUIBelotte:
         for card in deck:
             if card.get_loc() == "deck":
                 continue
-            card.state.update = 0
             # Gather card representation and grid position
             player = card.get_pos()
             orientation = PLAYER_ORIENTATION[player]

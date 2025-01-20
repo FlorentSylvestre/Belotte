@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from Cards import Cards
     from Game_logic import BelotePlayerInfos, BelotteBoardInfos, BelotteGame
@@ -64,6 +65,9 @@ def is_playable_belotte(player: 'Player', card: 'Cards', game: 'BelotteGame') ->
         if is_trump_asked(game.board):
             return is_mate_master(player, game.players, game.get_winner())
         return False
+
+    if is_mate_master(player, game.players, game.get_winner()):
+        return True
 
     if not is_trump(card, game.board.trump):
         return False
