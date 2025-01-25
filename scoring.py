@@ -4,7 +4,7 @@ from Constante import TOTAL_SCORE_ROUND
 
 if TYPE_CHECKING:
     from Cards import Cards
-    from Game_logic import BelotteGame
+    from Game_data import BelotteGame
 
 
 def is_round_won(score: int):

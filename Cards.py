@@ -4,7 +4,7 @@ from Constante import BELOTE_VALUES, BELOTE_SUITS, BELOTE_TRUMP_SCORE, BELOTE_SC
 from Protocols import CardState
 
 if TYPE_CHECKING:
-    from player import Player
+    from playerbelotte import PlayerBelotte
 
 
 class StateDeck:
@@ -17,7 +17,7 @@ class StateDeck:
         self.orientation = "v"
 
     @staticmethod
-    def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:
+    def play_card(card: 'Cards', player: Optional['PlayerBelotte'] = None) -> None:
         if player is None:
             card.state = StateFlipped()
             return None
@@ -36,7 +36,7 @@ class StateFlipped:
         self.orientation = "v"
 
     @staticmethod
-    def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:
+    def play_card(card: 'Cards', player: Optional['PlayerBelotte'] = None) -> None:
         if player is not None:
             player.register_card(card)
             card.state = StateHand(player, card)
@@ -44,7 +44,7 @@ class StateFlipped:
 
 class StateHand:
 
-    def __init__(self, player: 'Player', card: 'Cards'):
+    def __init__(self, player: 'PlayerBelotte', card: 'Cards'):
         self.player = player
         self.loc = "hand"
         self.pos = (player.hand.index(card), len(player.hand))
@@ -57,7 +57,7 @@ class StateHand:
                     self.pos[1] - 1)
 
     @staticmethod
-    def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:
+    def play_card(card: 'Cards', player: Optional['PlayerBelotte'] = None) -> None:
         card_pos = player.hand.index(card)
         player.remove_card(card)
         for c in player.hand[card_pos:]:
@@ -66,7 +66,7 @@ class StateHand:
 
 
 class StatePlayed:
-    def __init__(self, player: 'Player'):
+    def __init__(self, player: 'PlayerBelotte'):
         self.player = player
         self.loc = "played"
         self.pos = (0, 1)
@@ -75,7 +75,7 @@ class StatePlayed:
         self.orientation = player.orientation
 
     @staticmethod
-    def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:
+    def play_card(card: 'Cards', player: Optional['PlayerBelotte'] = None) -> None:
         pass
 
 
@@ -98,10 +98,10 @@ class Cards:
     def get_loc(self) -> str:
         return self.state.loc
 
-    def get_player(self) -> Optional['Player']:
+    def get_player(self) -> Optional['PlayerBelotte']:
         return self.state.player
 
-    def play_card(self, player: Optional['Player']):
+    def play_card(self, player: Optional['PlayerBelotte']):
         self.state.play_card(self, player)
 
     def reinitialize(self):
@@ -131,7 +131,7 @@ class BeloteDeck:
     def __init__(self, deck):
         self.deck: list['Cards'] = deck
 
-    def draw_cards(self, player: Optional['Player'], n: int = 1) -> None:
+    def draw_cards(self, player: Optional['PlayerBelotte'], n: int = 1) -> None:
         draw = [x for x in self.deck if x.get_loc() == "deck"]
         for x in draw[:n]:
             x.play_card(player)

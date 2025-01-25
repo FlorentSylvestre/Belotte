@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, List
 from Constante import BELOTE_SUITS
 
 if TYPE_CHECKING:
-    from Game_logic import BelotteGame
+    from Game_data import BelotteGame
     from Cards import Cards
     from Protocols import Strategy
 
@@ -49,7 +49,7 @@ class RandomBelotteStrategy:
 
 
 @dataclass
-class Player:
+class PlayerBelotte:
     name: str  # Useless for now
     team: int  # 0 or 1, shared by team member
     pos: str  # position of the board : 1,2,3 or 4. 1 is player, clockwise rotation
@@ -71,7 +71,7 @@ class Player:
 
 @dataclass
 class Winner:
-    player: "Player"
+    player: "PlayerBelotte"
     card: "Cards"
 
     def __post_init__(self):
@@ -82,7 +82,7 @@ class Winner:
 
 def define_players():
     """Create a basic set of player with random bots"""
-    return [Player(input("Enter Name "), 0, "1", RealBelotteStrategy()),
-            Player("Bot1", 1, "2", RandomBelotteStrategy()),
-            Player("Bot2", 0, "3", RandomBelotteStrategy()),
-            Player("Bot3", 1, "4", RandomBelotteStrategy())]
+    return [PlayerBelotte(input("Enter Name "), 0, "1", RealBelotteStrategy()),
+            PlayerBelotte("Bot1", 1, "2", RandomBelotteStrategy()),
+            PlayerBelotte("Bot2", 0, "3", RandomBelotteStrategy()),
+            PlayerBelotte("Bot3", 1, "4", RandomBelotteStrategy())]

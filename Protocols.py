@@ -1,21 +1,30 @@
+import dataclasses
 from typing import Protocol, Optional, Callable, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
-    from player import Player
     from Cards import Cards
-    from Game_logic import BelotteGame
+    from Game_data import BelotteGame
+
+type prompter = dict["str", tuple[str, Callable]]
+
+
+class Player(Protocol):
+    name: str  # Useless for now
+    team: int  # 0 or 1, shared by team member
+    pos: str  # position of the board : 1,2,3 or 4. 1 is player, clockwise rotation
+    strategy: "Strategy"
 
 
 class CardState(Protocol):
     loc: str
-    player: Optional["Player"]
+    player: Optional["Player_belotte"]
     pos = Tuple[int, int]
     visible = bool
     size = str
     orientation = "v"
 
     @staticmethod
-    def play_card(card: 'Cards', player: Optional['Player'] = None) -> None:
+    def play_card(card: 'Cards', player: Optional['Player_belotte'] = None) -> None:
         ...
 
 

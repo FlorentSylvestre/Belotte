@@ -2,83 +2,15 @@ from random import shuffle
 from typing import Optional
 from Cards import Cards, BeloteDeck
 from GUI import GUIBelotte
-from player import Player, Winner
-from rules import is_playable_belotte, is_trump
+from playerbelotte import PlayerBelotte, Winner
+from rules import is_playable_belotte
 from scoring import BelotteScore
 from Protocols import GameState
-
-
-class BelotePlayerInfos:
-
-    def __init__(self, players):
-        self.players: Optional[list[Player]] = players
-        self.dealer: Player = players[3]  # TODO randomize first dealer later, is fixed for testing
-        self.reorder(self.players.index(self.dealer) + 1)
-
-    def reorder(self, p: int | Player) -> None:
-        k = p if isinstance(p, int) else self.players.index(p)
-        self.players = self.players[k:] + self.players[:k]
-
-    def shift_dealer(self) -> None:
-        """ Set the player left to the last dealer as the new dealer"""
-        index = self.players.index(self.dealer)
-        if index == 4:  # Handle when previous dealer is last on list
-            index = 0
-
-        self.reorder(index)
-        self.dealer = self.players[index]
-
-    def get_partner(self, player) -> Player:
-        for p in self.players:
-            if player.team == p.team and player.name != p.name:
-                return p
-
-    def __getitem__(self, item) -> Player | list[Player]:
-        return self.players[item]
-
-
-class BelotteBoardInfos:
-    def __init__(self):
-        self.current_Fold: list[Cards] = []
-        self.played_fold: list[list[Cards]] = []
-        self.asked_suit: Optional[str] = None
-        self.winner: Optional[Winner] = None
-        self.trump: Optional[str] = None
-
-    def add_played_card(self, card: Cards) -> None:
-        self.current_Fold.append(card)
-
-    def archive_fold(self) -> None:
-        for card in self.current_Fold:
-            card.reinitialize()
-        self.played_fold.append(self.current_Fold)
-        self.current_Fold = []
-
-    def update_winner(self, player: Player) -> None:  # TODO This should be in the rules
-        last_play = self.current_Fold[-1]
-        if len(self.current_Fold) == 1:
-            self.winner = Winner(player, last_play)
-            return None
-
-        is_winner_trump = is_trump(self.winner.card, self.trump)
-        is_last_play_trump = is_trump(last_play, self.trump)
-
-        if not is_winner_trump and is_last_play_trump:
-            self.winner = Winner(player, last_play)
-            return None
-
-        if is_winner_trump == is_last_play_trump and (last_play.score > self.winner.card.score):
-            self.winner = Winner(player, last_play)
-
-    def get_winner_team(self) -> Optional[int]:
-        if self.winner is not None:
-            return self.winner.team
-
 
 class BelotteDealState:
 
     @staticmethod
-    def init_round(game: "BelotteGame", player: 'Player', suit=None):
+    def init_round(game: "BelotteGame", player: 'PlayerBelotte', suit=None):
         if suit is None:
             game.board.trump = game.deck[20].suit
         else:
@@ -157,17 +89,17 @@ class BelotteGame:
         self.score: BelotteScore = BelotteScore()
         self.state: "GameState" = BelotteDealState()
         self.deck: "BeloteDeck" = deck
-        self.has_taken: Optional[Player] = None
+        self.has_taken: Optional[PlayerBelotte] = None
         self.count_turn: int = 1
         self.game_played: bool = False
 
     def get_winner(self) -> Winner:
         return self.board.winner
 
-    def get_hand(self, player: 'Player'):
+    def get_hand(self, player: 'PlayerBelotte'):
         return [c for c in self.deck if c.get_player() == player]
 
-    def set_playable_cards(self, player: 'Player', hand: list['Cards']) -> None:
+    def set_playable_cards(self, player: 'PlayerBelotte', hand: list['Cards']) -> None:
         for card in hand:
             card.legit = is_playable_belotte(player, card, self)
 
@@ -181,7 +113,7 @@ class BelotteGame:
         self.deck = BeloteDeck([j for i in new_deck for j in i])
         self.deck.reinitialize_cards()
 
-    def player_turn(self, player: 'Player') -> 'Cards':
+    def player_turn(self, player: 'PlayerBelotte') -> 'Cards':
         hand = [x for x in self.deck if x.get_player() == player]
         self.set_playable_cards(player, hand)
         self.print_game()

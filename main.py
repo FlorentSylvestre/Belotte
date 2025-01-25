@@ -1,7 +1,7 @@
 from Cards import generate_32_card_deck
 from Constante import WIN_SCORE, CARD_PLOT_COORD, CARD_PLOT_STRING, OFFSET
-from Game_logic import *
-from player import define_players
+from Game_data import *
+from playerbelotte import define_players
 from rules import *
 
 

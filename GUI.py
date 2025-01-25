@@ -1,6 +1,5 @@
 import os
-from typing import Callable
-
+from Protocols import prompter
 from Cards import BeloteDeck, Cards
 from Constante import PLAYER_ORIENTATION, CARD_CHAR, SYSTEM_CLEAR, \
     CARD_CHAR_PLAYABLE, WIN_SCORE
@@ -20,9 +19,6 @@ def init_grid_belotte() -> list[list[str]]:
         layout[i][87] = "|"
         layout[i][94] = "|"
     return layout
-
-
-type prompter = dict["str", tuple[str, Callable]]
 
 
 def check_options(options: list[str]) -> str:
@@ -139,7 +135,7 @@ class GUIBelotte:
             self.add_card_to_grid(card_string, card_coord)
 
             # Played or flipped card values can be seenY
-            if card.get_loc() == "flipped" or card.get_loc() == "played" or player == "1":
+            if card.state.visible:
                 self.show_value(card, card_coord, orientation)
 
             # Print First player legal moves and card values
