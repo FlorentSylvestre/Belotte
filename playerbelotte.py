@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, List
 from Constante import BELOTE_SUITS
 
 if TYPE_CHECKING:
-    from Game_data import BelotteGame
+    from Game_logic import BelotteGame
     from Cards import Cards
     from Protocols import Strategy
 

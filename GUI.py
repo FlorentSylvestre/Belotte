@@ -148,6 +148,7 @@ class GUIBelotte:
         self.count_option = 0
 
     def print_grid(self):
+        self.clear_screen()
         print("\n".join(["".join(x) for x in self.grid]))
 
     @staticmethod

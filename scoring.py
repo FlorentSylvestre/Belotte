@@ -4,7 +4,7 @@ from Constante import TOTAL_SCORE_ROUND
 
 if TYPE_CHECKING:
     from Cards import Cards
-    from Game_data import BelotteGame
+    from Game_logic import BelotteGame
 
 
 def is_round_won(score: int):
@@ -42,7 +42,7 @@ class BelotteScore:
 
         if is_round_won(self.score):
             print({game.has_taken.team: self.score,
-                    (1 - game.has_taken.team): TOTAL_SCORE_ROUND - self.score})
+                   (1 - game.has_taken.team): TOTAL_SCORE_ROUND - self.score})
             return {game.has_taken.team: self.score,
                     (1 - game.has_taken.team): TOTAL_SCORE_ROUND - self.score}
 
