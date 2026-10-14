@@ -236,7 +236,7 @@ class BelotteGame:
     def reinitialize_score(self) -> None:
         [c.set_legit(False) for c in self.deck]
 
-    def run_round(self) -> (int, int):
+    def run_round(self) -> tuple[int, int]:
         self.start_phase()
         if not self.game_played:
             hands = [self.get_hand(p) for p in self.get_players()]
